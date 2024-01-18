@@ -1,4 +1,4 @@
-from gui import MainWindow
+from gui import Window
 import sys
 from PyQt6.QtWidgets import QApplication, QMessageBox
 
@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QApplication, QMessageBox
 def main():
     app = QApplication(sys.argv)
 
-    window = MainWindow()
+    window = Window()
     window.show()
 
     try:

@@ -12,39 +12,75 @@ import matplotlib
 
 
 # Subclass QMainWindow to customize your application's main window
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
+class Window(QWidget):
+    def __init__(self,parent=None):
+        super().__init__(parent)
 
         self.setWindowTitle("SWD")
+        #Zmienne
+        self.chosen_metod = 0;
 
+        #Stworzenie 3 boxów
         main_layout = QHBoxLayout()
+        left_box = QGroupBox()
+        self.box_config = QGroupBox("Konfiguracja")
+        layout_config = QVBoxLayout()
+        self.box_ranking = QGroupBox("Ranking")
+        layout_ranking = QVBoxLayout()
+        self.box_routes = QGroupBox("Trasy")
+        layout_routes = QVBoxLayout()
 
+        #KONFIGURACJA
+        #Wczytywanie danych z pliku
+        self.dane = QPushButton("Wczytaj dane z pliku")
+
+        #Wybór metody
         self.cb = QComboBox()
-        self.cb.addItem("Wybierz metode")
-        self.cb.addItem("Topsis")
-        self.cb.addItem("RSM")
+        self.cb.addItems(["Wybierz metode","Topsis","RSM"])
+        self.cb.activated.connect(self.choose_metod)
 
-        main_layout.addWidget(self.cb)
-        main_layout.addWidget(QPushButton("Ranking"))
+        #Rozpoczęcie algorytmu
+        self.start_button = QPushButton("Stwórz ranking")
+        self.start_button.clicked.connect(self.start_metod)
 
-        self.config = Config(self)
-        self.config.setLayout(main_layout)
+        #Dodanie widgetów
+        layout_config.addWidget(self.dane)
+        layout_config.addWidget(self.cb)
+        layout_config.addWidget(self.start_button)
 
-        self.setCentralWidget(self.config)
+        #DODAWANIE TRAS
 
-class Config(QWidget):
-    def __init__(self, parent: MainWindow):
-        super(Config, self).__init__()
+        #Dodanie odpowiednich layoutów do boxów
+        self.box_config.setLayout(layout_config)
+        self.box_ranking.setLayout(layout_ranking)
+        self.box_routes.setLayout(layout_routes)
+        
+        #Dodanie boxów do głównego widoku
+        main_layout.addWidget(left_box)
+        main_layout.addWidget(self.box_config)
+        left_layout = QVBoxLayout()
+        left_box.setLayout(left_layout)
+        left_box.setFixedWidth(1200)
+        left_layout.addWidget(self.box_routes)
+        left_layout.addWidget(self.box_ranking)
+        
 
-        self.parent = parent
+        self.setLayout(main_layout)
+        self.showMaximized()
 
-        layout_main = QFormLayout()
+    def choose_metod(self):
+        if self.cb.currentIndex()==0:
+            self.chosen_metod=0
+        elif self.cb.currentIndex()==1:
+            self.chosen_metod=1
+        else:
+            self.chosen_metod=2
 
-'''
-class Ranking(QWidget):
-    def __init__(self, parent: MainWindow):
-        super(Ranking, self).__init__()
-
-        self.parent = parent
-'''
+    def start_metod(self):
+        if self.chosen_metod==0:
+            QMessageBox.warning(self, "Brak danych", "Wybierz metode!",
+                                buttons=QMessageBox.StandardButton.Ok)
+        elif self.chosen_metod==1:
+            pass
+        elif self.chosen_metod==2:
+            pass
