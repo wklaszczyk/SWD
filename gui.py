@@ -1,8 +1,8 @@
 import sys
-import pandas #pip install pandas
+import pandas as pd #pip install pandas
 from route_data import Route
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QMessageBox, QFormLayout, \
-    QFileDialog, QComboBox, QLineEdit, QGroupBox, QTabWidget,QTableWidget, QLabel, QPushButton, QDialog, \
+    QFileDialog, QComboBox, QLineEdit,QTableWidgetItem, QGroupBox, QTabWidget,QTableWidget, QLabel, QPushButton, QDialog, \
     QDoubleSpinBox, QSpinBox, QListWidget, QGridLayout, QRadioButton, QCheckBox, QScrollArea
 from PyQt6.QtCore import pyqtSlot, QPoint
 from PyQt6.QtGui import QPixmap, QPainter, QColor, QFont, QPolygon, QPalette
@@ -28,7 +28,7 @@ class Window(QWidget):
         self.box_config = QGroupBox("Konfiguracja")
         layout_config = QHBoxLayout()
         self.box_ranking = QGroupBox("Ranking")
-        layout_ranking = QVBoxLayout()
+        self.layout_ranking = QVBoxLayout()
         self.box_routes = QGroupBox("Trasy")
         layout_routes = QHBoxLayout()
 
@@ -59,9 +59,9 @@ class Window(QWidget):
         self.routes_table.setColumnCount(5)
         self.routes_table.setColumnWidth(0, 150)
         self.routes_table.setColumnWidth(1, 150)
-        self.routes_table.setColumnWidth(2, 50)
-        self.routes_table.setColumnWidth(3, 50)
-        self.routes_table.setColumnWidth(4, 50)  
+        self.routes_table.setColumnWidth(2, 200)
+        self.routes_table.setColumnWidth(3, 200)
+        self.routes_table.setColumnWidth(4, 200)  
 
         layout_routes.addWidget(self.routes_table)
 
@@ -71,9 +71,8 @@ class Window(QWidget):
         self.add_route_button = QPushButton("Dodaj trase")
         layout_add_routes.addWidget(self.add_route_button)
         self.add_route_button.clicked.connect(self.add_route)
-        adding_route = Route(self.params[0],self.params[1],self.params[2],self.params[3],self.params[4])
+        adding_route = [self.params[0],self.params[1],self.params[2],self.params[3],self.params[4]]
         self.routes.append(adding_route)
-
 
         #Edytowanie
         self.edit_route_button = QPushButton("Edytuj trase")
@@ -89,14 +88,11 @@ class Window(QWidget):
         layout_add_routes.addWidget(self.remove_route_button)
 
         #RANKING
-        self.rank_table = QTableWidget(parent)
-        self.rank_table.setFixedSize(1500,400)
-        layout_ranking.addWidget(self.rank_table)
 
 
         #Dodanie odpowiednich layoutów do boxów
         self.box_config.setLayout(layout_config)
-        self.box_ranking.setLayout(layout_ranking)
+        self.box_ranking.setLayout(self.layout_ranking)
         self.box_routes.setLayout(layout_routes)
         
         #Dodanie boxów do głównego widoku
@@ -125,13 +121,50 @@ class Window(QWidget):
             if self.chosen_metod==0:
                 QMessageBox.warning(self, "Brak danych", "Wybierz metode!",
                                     buttons=QMessageBox.StandardButton.Ok)
-            elif self.chosen_metod==1:
-                pass
-            elif self.chosen_metod==2:
-                pass
+            else:
+                if self.chosen_metod==1:
+                    ranked_routes = self.routes
+                elif self.chosen_metod==2:
+                    ranked_routes = []
+                else:
+                    ranked_routes = []
+            
+                if len(ranked_routes) == 0:
+                    return
+                self.rank_table = QTableWidget()
+                self.rank_table.setFixedSize(1500,400)
+                self.rank_table.setRowCount(len(ranked_routes))
+                self.rank_table.setColumnCount(len(ranked_routes[0]))
+                        
+                for i in range(ranked_routes):
+                    for j in range(ranked_routes[i]):
+                        if isinstance(value, (float, int)):
+                            value = '{0:0,.0f}'.format(value)
+                        tableItem = QTableWidgetItem(str(ranked_routes[i][j]))
+                        self.rank_table.setItem(i,j,tableItem)
+                self.layout_ranking.addWidget(self.rank_table)
+
+
 
     def import_from_file(self):
-        QFileDialog.getOpenFileName(self, "Otwórz plik")[0]
+        #file_name = QFileDialog.getOpenFileName(self, "Otwórz plik",filter="*.xlsx")[0]
+        df = pd.read_excel("Baza_nasza.xlsx")
+        if df.size ==0:
+            return
+        self.routes_table.setRowCount(df.shape[0])
+        self.routes_table.setColumnCount(df.shape[1])
+        self.routes_table.setHorizontalHeaderLabels(df.columns)
+        
+        for row in df.iterrows():
+            route_parameters = []
+            values = row[1]
+            for col_index, value in enumerate(values):
+                if isinstance(value, (float, int)):
+                    value = '{0:0,.0f}'.format(value)
+                tableItem = QTableWidgetItem(str(value))
+                self.routes_table.setItem(row[0], col_index, tableItem)
+                route_parameters.append(tableItem)
+            self.routes.append([route_parameters[0],route_parameters[1],route_parameters[2],route_parameters[3],route_parameters[4]])
 
     #Dodawanie/edytowanie trasy - okno dialogowe
     def add_route(self):
