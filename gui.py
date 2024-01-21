@@ -1,4 +1,5 @@
 import sys
+from RSM import *
 import pandas as pd #pip install pandas
 from route_data import Route
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QMessageBox, QFormLayout, \
@@ -6,11 +7,6 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHB
     QDoubleSpinBox, QSpinBox, QListWidget, QGridLayout, QRadioButton, QCheckBox, QScrollArea
 from PyQt6.QtCore import pyqtSlot, QPoint
 from PyQt6.QtGui import QPixmap, QPainter, QColor, QFont, QPolygon, QPalette
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-import matplotlib.pyplot as plt
-import matplotlib
-
 
 # Subclass QMainWindow to customize your application's main window
 class Window(QWidget):
@@ -123,33 +119,39 @@ class Window(QWidget):
                                     buttons=QMessageBox.StandardButton.Ok)
             else:
                 if self.chosen_metod==1:
-                    ranked_routes = self.routes
-                elif self.chosen_metod==2:
                     ranked_routes = []
+                elif self.chosen_metod==2:
+                    try:
+                        ranked_routes = RSM([self.routes[0],self.routes[2]],self.routes)
+                    except Exception as e:
+                        print("Błąd:",e)
+                        #QMessageBox.critical(self, "Krytyczny błąd", "Aplikacja napotkała straszny błąd",buttons=QMessageBox.StandardButton.Abort)
                 else:
                     ranked_routes = []
             
                 if len(ranked_routes) == 0:
                     return
+                '''
                 self.rank_table = QTableWidget()
                 self.rank_table.setFixedSize(1500,400)
                 self.rank_table.setRowCount(len(ranked_routes))
                 self.rank_table.setColumnCount(len(ranked_routes[0]))
-                        
+
+                
                 for i in range(ranked_routes):
                     for j in range(ranked_routes[i]):
                         if isinstance(value, (float, int)):
                             value = '{0:0,.0f}'.format(value)
                         tableItem = QTableWidgetItem(str(ranked_routes[i][j]))
                         self.rank_table.setItem(i,j,tableItem)
+                
                 self.layout_ranking.addWidget(self.rank_table)
-
-
+                '''
 
     def import_from_file(self):
-        #file_name = QFileDialog.getOpenFileName(self, "Otwórz plik",filter="*.xlsx")[0]
-        df = pd.read_excel("Baza_nasza.xlsx")
-        if df.size ==0:
+        file_name = QFileDialog.getOpenFileName(self, "Otwórz plik",filter="*.xlsx")[0]
+        df = pd.read_excel(file_name)
+        if df.size == 0:
             return
         self.routes_table.setRowCount(df.shape[0])
         self.routes_table.setColumnCount(df.shape[1])
