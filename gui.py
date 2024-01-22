@@ -119,8 +119,9 @@ class Window(QWidget):
                 if self.chosen_metod==1:
                     ranked_routes = []
                 elif self.chosen_metod==2:
-                    weights = [] #DO UZUPEŁNIENIA
-                    A = [] #macierz punktów odniesienia, DO UZUPEŁNIENIA
+                    weights = [0.6, 0.5, 0.5, 0.9, 1, 3] #DO UZUPEŁNIENIA
+                    A = [[[0, 0, 0, 0, -1, 0]],
+                        [[5000, 6, 6, 120, 4, 5]]] #macierz punktów odniesienia, DO UZUPEŁNIENIA
                     ranked_routes = RSM(A,self.routes,weights)
                 else:
                     ranked_routes = []
@@ -186,8 +187,8 @@ class Window(QWidget):
                     else:
                         route_parameters.append(1)
                 else:
-                    value = '{0:0,.0f}'.format(value)
                     route_parameters.append(value)
+                    value = '{0:0,.0f}'.format(value)
                 tableItem = QTableWidgetItem(str(value))
                 self.routes_table.setItem(row[0], col_index, tableItem)
             if row!=0:
