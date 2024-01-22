@@ -17,7 +17,6 @@ class Window(QWidget):
         #Zmienne
         self.chosen_metod = 0
         self.routes = []
-        self.params = []
 
         #Stworzenie 3 boxów
         main_layout = QVBoxLayout()
@@ -58,6 +57,7 @@ class Window(QWidget):
         self.routes_table.setColumnWidth(2, 200)
         self.routes_table.setColumnWidth(3, 200)
         self.routes_table.setColumnWidth(4, 200)  
+        self.routes_table.setColumnWidth(5, 100)
 
         layout_routes.addWidget(self.routes_table)
 
@@ -131,8 +131,8 @@ class Window(QWidget):
                 
                 self.rank_table = QTableWidget()
                 self.rank_table.setFixedSize(1500,400)
-                self.rank_table.setRowCount(len(ranked_routes))
-                self.rank_table.setColumnCount(len(ranked_routes[1]))
+                self.rank_table.setRowCount(len(ranked_routes)+1)
+                self.rank_table.setColumnCount(len(ranked_routes[0][0])+1)
                 
                 for i in range(len(ranked_routes)):
                     for j in range(len(ranked_routes[i][0])):
@@ -152,16 +152,16 @@ class Window(QWidget):
                         tableItem = QTableWidgetItem(str(value))
                         self.rank_table.setItem(i,j,tableItem)
                     value = ranked_routes[i][1]
-                    value = '{0:0,.0f}'.format(value)
                     tableItem = QTableWidgetItem(str(value))
-                    self.rank_table.setItem(i,j,tableItem)
+                    self.rank_table.setItem(i,j+1,tableItem)
                 
                 self.rank_table.setColumnWidth(0, 150)
                 self.rank_table.setColumnWidth(1, 150)
                 self.rank_table.setColumnWidth(2, 200)
                 self.rank_table.setColumnWidth(3, 200)
                 self.rank_table.setColumnWidth(4, 200)
-                self.rank_table.setColumnWidth(4, 200)
+                self.rank_table.setColumnWidth(5, 100)
+                self.rank_table.setColumnWidth(6, 200)
                 self.layout_ranking.addWidget(self.rank_table)
                 
     def import_from_file(self):
@@ -196,7 +196,7 @@ class Window(QWidget):
 
     #Dodawanie/edytowanie trasy - okno dialogowe
     def add_route(self):
-        self.params = []
+        self.params = [0,0,0,0,0,'']
         add_dialog = QDialog()
         layout = QFormLayout()
         route_lenght = QSpinBox()
@@ -233,15 +233,17 @@ class Window(QWidget):
         self.route_transport.addItems(['Wybierz środek transportu','Pieszo','Skuter','Narty','Helikopter'])
         self.route_transport.activated.connect(self.update_transport)           
         layout.addRow("Transport:",self.route_transport)
-        
-        adding_route = [self.params[0],self.params[1],self.params[2],self.params[3],self.params[4]]
-        self.routes.append(adding_route)
 
         add_button = QPushButton("Dodaj trase")
+        add_button.clicked.connect(self.add)
         add_button.clicked.connect(add_dialog.accept)
         layout.addRow(add_button)
         add_dialog.setLayout(layout)
         add_dialog.exec()
+
+    def add(self):
+        adding_route = [self.params[0],self.params[1],self.params[2],self.params[3],self.params[4]]
+        self.routes.append(adding_route)
 
     @pyqtSlot(int)
     def update_lenght(self,lenght):
