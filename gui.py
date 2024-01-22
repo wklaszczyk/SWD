@@ -17,7 +17,7 @@ class Window(QWidget):
         #Zmienne
         self.chosen_metod = 0
         self.routes = []
-        self.params = [0,0,0,0,0,'']
+        self.params = []
 
         #Stworzenie 3 boxów
         main_layout = QVBoxLayout()
@@ -67,8 +67,6 @@ class Window(QWidget):
         self.add_route_button = QPushButton("Dodaj trase")
         layout_add_routes.addWidget(self.add_route_button)
         self.add_route_button.clicked.connect(self.add_route)
-        adding_route = [self.params[0],self.params[1],self.params[2],self.params[3],self.params[4]]
-        self.routes.append(adding_route)
 
         #Edytowanie
         self.edit_route_button = QPushButton("Edytuj trase")
@@ -85,7 +83,6 @@ class Window(QWidget):
 
         #RANKING
 
-
         #Dodanie odpowiednich layoutów do boxów
         self.box_config.setLayout(layout_config)
         self.box_ranking.setLayout(self.layout_ranking)
@@ -96,7 +93,6 @@ class Window(QWidget):
         self.box_config.setFixedHeight(70)
         main_layout.addWidget(self.box_routes)
         main_layout.addWidget(self.box_ranking)
-        
 
         self.setLayout(main_layout)
         self.showMaximized()
@@ -125,32 +121,48 @@ class Window(QWidget):
                 elif self.chosen_metod==2:
                     weights = [] #DO UZUPEŁNIENIA
                     A = [] #macierz punktów odniesienia, DO UZUPEŁNIENIA
-                    try:
-                        ranked_routes = RSM(A,self.routes,weights)
-                    except Exception as e:
-                        print("Błąd:",e)
+                    ranked_routes = RSM(A,self.routes,weights)
                 else:
                     ranked_routes = []
             
                 if len(ranked_routes) == 0:
                     return
-                '''
+                
                 self.rank_table = QTableWidget()
                 self.rank_table.setFixedSize(1500,400)
                 self.rank_table.setRowCount(len(ranked_routes))
-                self.rank_table.setColumnCount(len(ranked_routes[0]))
-
+                self.rank_table.setColumnCount(len(ranked_routes[1]))
                 
-                for i in range(ranked_routes):
-                    for j in range(ranked_routes[i]):
+                for i in range(len(ranked_routes)):
+                    for j in range(len(ranked_routes[i][0])):
+                        if j==5:
+                            if ranked_routes[i][0][j]==1:
+                                value = 'Pieszo'
+                            elif ranked_routes[i][0][j]==2:
+                                value = 'Narty'
+                            elif ranked_routes[i][0][j]==3:
+                                value = "Skuter"
+                            else:
+                                value = "Helikopter"
+                        else:
+                            value = ranked_routes[i][0][j]
                         if isinstance(value, (float, int)):
                             value = '{0:0,.0f}'.format(value)
-                        tableItem = QTableWidgetItem(str(ranked_routes[i][j]))
+                        tableItem = QTableWidgetItem(str(value))
                         self.rank_table.setItem(i,j,tableItem)
+                    value = ranked_routes[i][1]
+                    value = '{0:0,.0f}'.format(value)
+                    tableItem = QTableWidgetItem(str(value))
+                    self.rank_table.setItem(i,j,tableItem)
                 
+                self.rank_table.setColumnWidth(0, 150)
+                self.rank_table.setColumnWidth(1, 150)
+                self.rank_table.setColumnWidth(2, 200)
+                self.rank_table.setColumnWidth(3, 200)
+                self.rank_table.setColumnWidth(4, 200)
+                self.rank_table.setColumnWidth(4, 200)
                 self.layout_ranking.addWidget(self.rank_table)
-                '''
-
+                
     def import_from_file(self):
         file_name = QFileDialog.getOpenFileName(self, "Otwórz plik",filter="*.xlsx")[0]
         df = pd.read_excel(file_name)
@@ -164,15 +176,26 @@ class Window(QWidget):
             route_parameters = []
             values = row[1]
             for col_index, value in enumerate(values):
-                route_parameters.append(value)
-                if isinstance(value, (float, int)):
+                if isinstance(value, str):
+                    if value=="Helikopter":
+                        route_parameters.append(4)
+                    elif value=="Skuter":
+                        route_parameters.append(3)
+                    elif value=="Narty":
+                        route_parameters.append(2)
+                    else:
+                        route_parameters.append(1)
+                else:
                     value = '{0:0,.0f}'.format(value)
+                    route_parameters.append(value)
                 tableItem = QTableWidgetItem(str(value))
                 self.routes_table.setItem(row[0], col_index, tableItem)
-            self.routes.append([route_parameters[0],route_parameters[1],route_parameters[2],route_parameters[3],route_parameters[4]])
+            if row!=0:
+                self.routes.append([route_parameters[0],route_parameters[1],route_parameters[2],route_parameters[3],route_parameters[4],route_parameters[5]])
 
     #Dodawanie/edytowanie trasy - okno dialogowe
     def add_route(self):
+        self.params = []
         add_dialog = QDialog()
         layout = QFormLayout()
         route_lenght = QSpinBox()
@@ -210,6 +233,9 @@ class Window(QWidget):
         self.route_transport.activated.connect(self.update_transport)           
         layout.addRow("Transport:",self.route_transport)
         
+        adding_route = [self.params[0],self.params[1],self.params[2],self.params[3],self.params[4]]
+        self.routes.append(adding_route)
+
         add_button = QPushButton("Dodaj trase")
         add_button.clicked.connect(add_dialog.accept)
         layout.addRow(add_button)
