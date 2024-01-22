@@ -161,11 +161,11 @@ class Window(QWidget):
             route_parameters = []
             values = row[1]
             for col_index, value in enumerate(values):
+                route_parameters.append(value)
                 if isinstance(value, (float, int)):
                     value = '{0:0,.0f}'.format(value)
                 tableItem = QTableWidgetItem(str(value))
                 self.routes_table.setItem(row[0], col_index, tableItem)
-                route_parameters.append(tableItem)
             self.routes.append([route_parameters[0],route_parameters[1],route_parameters[2],route_parameters[3],route_parameters[4]])
 
     #Dodawanie/edytowanie trasy - okno dialogowe
