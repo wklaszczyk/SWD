@@ -61,7 +61,7 @@ def reference_set_check(A):
                     A[i+1].append(pl)
                     A[i].pop(n)
 
-def RSM(A, U):
+def RSM(A, U, weights):
     #A - lista punktów odniesienia, U - lista alternatyw
     #zwraca posortowany ranking od najlepszego do najgorszego
     reference_set_check(A)
@@ -109,7 +109,7 @@ def RSM(A, U):
             for j in range(len(higher_set)):
                 hp = higher_set[j]
                 V = 1
-                edges = [abs(lp[z] - hp[z]) for z in range(len(lp))]
+                edges = [abs((lp[z] - hp[z]) * weights[z]) for z in range(len(lp))]
 
                 for edge in edges:
                     V = V * edge
@@ -123,8 +123,8 @@ def RSM(A, U):
             for j in range(len(higher_set)):
                 hp = higher_set[j]
                 
-                lower_dist = (sum([(lp[z] - u[z])**2 for z in range(len(hp))]))**0.5
-                higher_dist = (sum([(hp[z] - u[z])**2 for z in range(len(hp))]))**0.5
+                lower_dist = (sum([((lp[z] - u[z]) * weights[z])**2 for z in range(len(hp))]))**0.5
+                higher_dist = (sum([((hp[z] - u[z]) * weights[z])**2 for z in range(len(hp))]))**0.5
                 
                 f_val += (volumes[(i, j)] / volume_sum) * higher_dist / (lower_dist + higher_dist)
             
