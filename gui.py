@@ -17,7 +17,7 @@ class Window(QWidget):
         #Zmienne
         self.chosen_metod = 0
         self.routes = []
-        self.params = [0,0,0,0,0]
+        self.params = [0,0,0,0,0,'']
 
         #Stworzenie 3 boxów
         main_layout = QVBoxLayout()
@@ -35,7 +35,7 @@ class Window(QWidget):
 
         #Wybór metody
         self.cb = QComboBox()
-        self.cb.addItems(["Wybierz metode","Topsis","RSM"])
+        self.cb.addItems(["Wybierz metode","Topsis","RSM","SP"])
         self.cb.activated.connect(self.choose_metod)
 
         #Rozpoczęcie algorytmu
@@ -106,8 +106,10 @@ class Window(QWidget):
             self.chosen_metod=0
         elif self.cb.currentIndex()==1:
             self.chosen_metod=1
-        else:
+        elif self.cb.currentIndex()==2:
             self.chosen_metod=2
+        else:
+            self.chosen_metod=3
 
     def start_metod(self):
         if len(self.routes) <2:
@@ -121,11 +123,12 @@ class Window(QWidget):
                 if self.chosen_metod==1:
                     ranked_routes = []
                 elif self.chosen_metod==2:
+                    weights = [] #DO UZUPEŁNIENIA
+                    A = [] #macierz punktów odniesienia, DO UZUPEŁNIENIA
                     try:
-                        ranked_routes = RSM([self.routes[0],self.routes[2]],self.routes)
+                        ranked_routes = RSM(A,self.routes,weights)
                     except Exception as e:
                         print("Błąd:",e)
-                        #QMessageBox.critical(self, "Krytyczny błąd", "Aplikacja napotkała straszny błąd",buttons=QMessageBox.StandardButton.Abort)
                 else:
                     ranked_routes = []
             
@@ -173,11 +176,39 @@ class Window(QWidget):
         add_dialog = QDialog()
         layout = QFormLayout()
         route_lenght = QSpinBox()
-        route_lenght.setRange(0,1000)
+        route_lenght.setRange(0,10000)
         route_lenght.setValue(0)
         route_lenght.valueChanged.connect(self.update_lenght)
         layout.addRow("Długość trasy:",route_lenght)
-        layout.addRow("Ilość poszkodowanych:",QSpinBox())
+
+        route_dificulty = QSpinBox()
+        route_dificulty.setRange(1,5)
+        route_lenght.setValue(1)
+        route_lenght.valueChanged.connect(self.update_dificulty)       
+        layout.addRow("Trudność trasy:",route_dificulty)
+
+        route_weather = QSpinBox()
+        route_weather.setRange(1,5)
+        route_weather.setValue(1)
+        route_weather.valueChanged.connect(self.update_weather)    
+        layout.addRow("Warunki atmosferyczne:",route_weather)
+
+        route_time = QSpinBox()
+        route_time.setRange(0,300)
+        route_time.setValue(0)
+        route_time.valueChanged.connect(self.update_time)    
+        layout.addRow("Czas dotarcia:",route_time)
+
+        route_avalanche = QSpinBox()
+        route_avalanche.setRange(0,3)
+        route_avalanche.setValue(0)
+        route_avalanche.valueChanged.connect(self.update_avalanche)         
+        layout.addRow("Zagrożenie lawinowe:",route_avalanche)
+
+        self.route_transport = QComboBox()
+        self.route_transport.addItems(['Wybierz środek transportu','Pieszo','Skuter','Narty','Helikopter'])
+        self.route_transport.activated.connect(self.update_transport)           
+        layout.addRow("Transport:",self.route_transport)
         
         add_button = QPushButton("Dodaj trase")
         add_button.clicked.connect(add_dialog.accept)
@@ -189,17 +220,71 @@ class Window(QWidget):
     def update_lenght(self,lenght):
         self.params[0] = lenght
 
+    def update_dificulty(self,dificulty):
+        self.params[1] = dificulty
+
+    def update_weather(self,weather):
+        self.params[2] = weather
+
+    def update_time(self,time):
+        self.params[3] = time
+        
+    def update_avalanche(self,avalanche):
+        self.params[4] = avalanche
+
+    def update_transport(self):
+        if self.route_transport.currentIndex()==1:
+            self.params[5] = 'Pieszo'
+        elif self.route_transport.currentIndex()==2:
+            self.params[5] = 'Skuter'
+        elif self.route_transport.currentIndex()==3:
+            self.params[5] = 'Narty'
+        elif self.route_transport.currentIndex()==4:
+            self.params[5] = 'Helikopter'
+        else:
+            pass
+
     def edit_route(self):
         edit_dialog = QDialog()
-        self.layout = QFormLayout()
-        self.route_lenght = QSpinBox()
-        self.route_lenght.setRange(0,1000)
-        self.layout.addRow("Długość trasy:",self.route_lenght)
-        self.layout.addRow("Ilość poszkodowanych:",QSpinBox())
+        layout = QFormLayout()
+        route_lenght = QSpinBox()
+        route_lenght.setRange(0,10000)
+        route_lenght.setValue(0)
+        route_lenght.valueChanged.connect(self.update_lenght)
+        layout.addRow("Długość trasy:",route_lenght)
 
-        self.add_button = QPushButton("Edytuj trase")
-        self.add_button.clicked.connect(self.add)
-        self.layout.addRow(self.add_button)
-        edit_dialog.setLayout(self.layout)
+        route_dificulty = QSpinBox()
+        route_dificulty.setRange(1,5)
+        route_lenght.setValue(1)
+        route_lenght.valueChanged.connect(self.update_dificulty)       
+        layout.addRow("Trudność trasy:",route_dificulty)
+
+        route_weather = QSpinBox()
+        route_weather.setRange(1,5)
+        route_weather.setValue(1)
+        route_weather.valueChanged.connect(self.update_weather)    
+        layout.addRow("Warunki atmosferyczne:",route_weather)
+
+        route_time = QSpinBox()
+        route_time.setRange(0,300)
+        route_time.setValue(0)
+        route_time.valueChanged.connect(self.update_time)    
+        layout.addRow("Czas dotarcia:",route_time)
+
+        route_avalanche = QSpinBox()
+        route_avalanche.setRange(0,3)
+        route_avalanche.setValue(0)
+        route_avalanche.valueChanged.connect(self.update_avalanche)         
+        layout.addRow("Zagrożenie lawinowe:",route_avalanche)
+
+        self.route_transport = QComboBox()
+        self.route_transport.addItems(['Wybierz środek transportu','Pieszo','Skuter','Narty','Helikopter'])
+        self.route_transport.activated.connect(self.update_transport)           
+        layout.addRow("Transport:",self.route_transport)
+
+        add_button = QPushButton("Edytuj trase")
+        add_button.clicked.connect(edit_dialog.accept)
+        layout.addRow(add_button)
+        edit_dialog.setLayout(layout)
         edit_dialog.exec()
 
