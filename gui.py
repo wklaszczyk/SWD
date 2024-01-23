@@ -1,5 +1,6 @@
 import sys
 from RSM import *
+from Metoda_Topsis import *
 import pandas as pd #pip install pandas
 from route_data import Route
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QMessageBox, QFormLayout, \
@@ -116,12 +117,13 @@ class Window(QWidget):
                 QMessageBox.warning(self, "Brak danych", "Wybierz metode!",
                                     buttons=QMessageBox.StandardButton.Ok)
             else:
+                weights = [0.6, 0.5, 0.5, 0.9, 1, 3]
+                
                 if self.chosen_metod==1:
-                    ranked_routes = []
+                    A = [[0, 0, 0, 0, -1, 0],[5000, 6, 6, 120, 4, 5]]
+                    ranked_routes = licz_topsis(A,self.routes,weights)
                 elif self.chosen_metod==2:
-                    weights = [0.6, 0.5, 0.5, 0.9, 1, 3] #DO UZUPEŁNIENIA
-                    A = [[[0, 0, 0, 0, -1, 0]],
-                        [[5000, 6, 6, 120, 4, 5]]] #macierz punktów odniesienia, DO UZUPEŁNIENIA
+                    A = [[[0, 0, 0, 0, -1, 0]],[[5000, 6, 6, 120, 4, 5]]]
                     ranked_routes = RSM(A,self.routes,weights)
                 else:
                     ranked_routes = []
