@@ -75,6 +75,9 @@ def licz_topsis(daneA, daneK, wektorWag):
         ranking[i, 0] = i + 1
         ranking[i, 1] = odleglosci[i, 1] / (odleglosci[i, 0] + odleglosci[i, 1])
 
+    # Sortowanie rankingu po drugiej kolumnie (odległość od antyidealnego)
+    ranking = ranking[ranking[:, 1].argsort()]
+
     # Wypisanie wyników
     print("Macierz Decyzyjna:\n", macierz_decyzyjna)
     print("Wektor Wag:\n", wektorWag)
@@ -103,9 +106,10 @@ def licz_topsis(daneA, daneK, wektorWag):
     plt.grid(True)
     plt.show()
 
-# Przykładowe użycie:
+# Przykładowe dane do testów
 daneA = np.array([[1, 2, 3, 4], [5, 6, 7, 8]])
 daneK = np.array([[1, 2, 3, 4], [5, 6, 7, 8]])
 wektorWag = [0.5, 0.3, 0.2]
 
+# Wywołanie funkcji z przykładowymi danymi
 licz_topsis(daneA, daneK, wektorWag)
