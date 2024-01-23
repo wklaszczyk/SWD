@@ -230,7 +230,7 @@ class Window(QWidget):
         layout.addRow("Zagrożenie lawinowe:",route_avalanche)
 
         self.route_transport = QComboBox()
-        self.route_transport.addItems(['Wybierz środek transportu','Pieszo','Skuter','Narty','Helikopter'])
+        self.route_transport.addItems(['Wybierz środek transportu','Pieszo','Narty','Skuter','Helikopter'])
         self.route_transport.activated.connect(self.update_transport)           
         layout.addRow("Transport:",self.route_transport)
 
@@ -242,8 +242,23 @@ class Window(QWidget):
         add_dialog.exec()
 
     def add(self):
-        adding_route = [self.params[0],self.params[1],self.params[2],self.params[3],self.params[4]]
+        adding_route = [self.params[0],self.params[1],self.params[2],self.params[3],self.params[4],self.params[5]]
         self.routes.append(adding_route)
+        self.routes_table.setRowCount(len(self.routes))
+        for i in range(len(adding_route)):
+            if i == 5:
+                if adding_route[i] == 1:
+                    table_item = 'Pieszo'
+                elif adding_route[i] == 2:
+                    table_item = 'Narty'
+                elif adding_route[i] == 3:
+                    table_item = 'Skuter'
+                else:
+                    table_item = 'Helikopter'
+                table_item = QTableWidgetItem(table_item) 
+            else:
+                table_item = QTableWidgetItem(str(adding_route[i]))
+            self.routes_table.setItem(len(self.routes)-1,i,table_item)
 
     @pyqtSlot(int)
     def update_lenght(self,lenght):
@@ -263,13 +278,13 @@ class Window(QWidget):
 
     def update_transport(self):
         if self.route_transport.currentIndex()==1:
-            self.params[5] = 'Pieszo'
+            self.params[5] = 1
         elif self.route_transport.currentIndex()==2:
-            self.params[5] = 'Skuter'
+            self.params[5] = 2
         elif self.route_transport.currentIndex()==3:
-            self.params[5] = 'Narty'
+            self.params[5] = 3
         elif self.route_transport.currentIndex()==4:
-            self.params[5] = 'Helikopter'
+            self.params[5] = 4
         else:
             pass
 
@@ -284,8 +299,8 @@ class Window(QWidget):
 
         route_dificulty = QSpinBox()
         route_dificulty.setRange(1,5)
-        route_lenght.setValue(1)
-        route_lenght.valueChanged.connect(self.update_dificulty)       
+        route_dificulty.setValue(1)
+        route_dificulty.valueChanged.connect(self.update_dificulty)       
         layout.addRow("Trudność trasy:",route_dificulty)
 
         route_weather = QSpinBox()
